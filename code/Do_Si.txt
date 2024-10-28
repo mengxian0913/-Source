@@ -1,0 +1,219 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "NUC100Series.h"
+#include "MCU_init.h"
+#include "SYS_init.h"
+#include "Seven_Segment.h"	
+#include "Scankey.h"
+
+#define Do (int)900 // half freq of Do
+#define Si (int)500 // half freq of Si
+#define Base (int)(500)
+#define Loop (int)(10)
+#define INF (long long)(1e18)
+#define SEC(t) (int)(t*1e6)
+
+int seed = 0, number = -1;
+int loop = 0, tone = 0;
+int currentDelay = 5000;
+
+
+void Init_GPIO() {
+  GPIO_SetMode(PC, BIT12, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT13, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT14, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT15, GPIO_MODE_OUTPUT);
+  PC12 = PC13 = PC14 = PC15 = 1;
+  return;
+}
+
+// display an integer on four 7-segment LEDs
+void Display_7seg()
+{
+  if( number == -1 ) {
+    CloseSevenSegment();
+    return;
+  }
+
+  CloseSevenSegment();
+  ShowSevenSegment(3, number % 3);
+  CLK_SysTickDelay(2000);
+
+  CloseSevenSegment();
+  ShowSevenSegment(1, number / 10);
+  CLK_SysTickDelay(2000);
+
+  CloseSevenSegment();
+  ShowSevenSegment(0, number % 10);
+  CLK_SysTickDelay(2000);
+
+  return;
+}
+
+void DoSi() {
+  if( tone ) { // Play Do
+    PB11 = 0;
+    CLK_SysTickDelay(Do);
+    PB11 = 1;
+    CLK_SysTickDelay(Do);
+    return;
+  }
+
+  // Play Si
+  PB11 = 0;
+  CLK_SysTickDelay(Si);
+  PB11 = 1;
+  CLK_SysTickDelay(Si);
+  return;
+}
+
+
+void Case1() {
+  // Count the cycle.
+  if( ( Loop * loop ) % Base == 0 ) {
+    PC12 ^= 1;
+    PC13 ^= 1;
+    PC14 ^= 1;
+    PC15 ^= 1;
+  }
+  return;
+}
+
+void Case2() {
+  // ( Loop * loop ) % Base == 0 -> One Cycle.
+  if ( ( Loop * loop ) % Base == 0 ) {
+    PC12 ^= 1;
+    PB11 ^= 1;
+  }
+  return;
+}
+
+void Case3() {
+  if ( ( Loop * loop ) % Base == 0 ) {
+    PC12 ^= 1;
+    PC15 ^= 1;
+    tone ^= 1; // switch Do / Si.
+  }
+
+  DoSi();
+  return;
+}
+
+
+void solve() {
+  if( number % 3 == 0 ) Case1();
+  else if( number % 3 == 1 ) Case2();
+  else Case3();
+  return;
+}
+
+void reset() {
+  PB11 = 1;
+  PC12 = PC13 = PC14 = PC15 = 1;
+  number = -1;
+  loop = 0;
+  currentDelay = 5000;
+  return;
+}
+
+void start() {
+  PB11 = 1;
+  PC12 = PC13 = PC14 = PC15 = 1;
+  loop = 0;
+  number = rand() % 100;
+  return;
+}
+
+
+void test() {
+
+  int tone = 0;
+  int i = 0;
+  loop = 0;
+
+  while( 1 ) {
+    CLK_SysTickDelay(Loop);
+    loop = ( loop + 1 ) % Base;
+
+    if( (loop * Loop) % Base == 0 ) {
+      tone ^= 1;
+    }
+
+    if (tone) {
+      PB11 = 0;
+      CLK_SysTickDelay(Do);
+      PB11 = 1;
+      CLK_SysTickDelay(Do);
+    } 
+
+    else {
+      PB11 = 0;
+      CLK_SysTickDelay(Si);
+      PB11 = 1;
+      CLK_SysTickDelay(Si);
+    }
+
+    /*
+    for(i = 0; i < 500; i++) {
+      PB11 = 0;
+      CLK_SysTickDelay(Do);
+      PB11 = 1;
+      CLK_SysTickDelay(Do);
+    }
+
+    for(i = 0; i < 500; i++) {
+      PB11 = 0;
+      CLK_SysTickDelay(Si);
+      PB11 = 1;
+      CLK_SysTickDelay(Si);
+    }*/
+
+
+  }
+  return;
+}
+
+
+
+int main(void)
+{
+  int i = 0, keyPressed = 0;
+  SYS_Init();
+  OpenKeyPad();    
+  GPIO_SetMode(PB, BIT11, GPIO_MODE_OUTPUT);
+  Init_GPIO();
+  reset();
+  // seg, keyboard -> timer -> buzzer, led
+
+  //test();
+
+  while(1) {
+    CLK_SysTickDelay(Loop);
+    loop = ( loop + 1 ) % ( Base / Loop) ;
+    Display_7seg();
+    seed = (seed + 1) % INF;
+    srand(seed);
+    i = ScanKey();
+
+    if( number != -1 ) solve(); // mode.
+
+    if( i == 0 ) {
+      keyPressed = 0;
+      continue;
+    }
+
+    if(keyPressed) {
+      continue;
+    }
+
+    keyPressed = 1;
+
+    if( i == 8 ) {
+      reset();
+    }
+
+    else if( i == 9 ) {
+      start();
+    }
+  }
+}

@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "NUC100Series.h"
+#include "MCU_init.h"
+#include "SYS_init.h"
+#include "Scankey.h"
+#include "LCD.h"
+#include "Seven_Segment.h"
+
+#define INF (int)(1e9)
+
+int password[4];
+int input[4];
+int currentIndex = 0;
+int seed = 0;
+
+// LCD
+char line[4][128];
+int lcdIndex = 0;
+
+// LED
+int currentLED = 0;
+int led[4];
+int showLED = 0;
+
+char *result[3] = {
+	"PASS",
+	"ERROR",
+	"NULL"
+};
+
+
+void LCD(int status) {
+	if ( lcdIndex >= 4 ) {
+		return;
+	}
+	
+	printS(64, 16 * lcdIndex++, result[status]);
+	return;
+}
+
+void BinLED() {
+	memset(led, 1, sizeof(led));
+	led[currentLED] = 0;
+	currentLED = ( currentLED + 1 ) % 4;
+	PC12 = led[0];
+	PC13 = led[1];
+	PC14 = led[2];
+	PC15 = led[3];
+	return;
+}
+
+void Buzz()
+{
+	PB11=0; // PB11 = 0 to turn on Buzzer
+	CLK_SysTickDelay(10000);     // Delay 
+	PB11=1; // PB11 = 1 to turn off Buzzer    
+	CLK_SysTickDelay(10000);     // Delay 
+}
+
+void Display_7seg()
+{
+	int i = 0;
+	if ( password[0] == -1 ) {
+		CloseSevenSegment();
+		return;
+	}
+	
+	for(i = 0; i < 4; i++) {
+		CloseSevenSegment();
+		ShowSevenSegment(i, password[i]);
+		CLK_SysTickDelay(2000);
+	}
+  return;
+}
+
+void userInput(int number) {
+	char C[1];
+	sprintf(C, "%d", number);
+	if ( currentIndex >= 4 || password[0] == -1 ) {
+		return;
+	}
+	
+	input[currentIndex] = number;
+	printS(8 * currentIndex, 16 * lcdIndex, C);
+	currentIndex++;
+	return;
+}
+
+void generatePassword() {
+	int i = 0;
+	for(i = 0; i < 4;i++) {
+		password[i] = rand() % 5 + 1;
+		seed = (seed + 1) & INF;
+	}
+	return;
+}
+
+void clearPassword() {
+	//memset(password, -1, sizeof(password));
+	memset(input, -1, sizeof(input));
+	clear_LCD();
+	currentIndex = 0;
+	lcdIndex = 0;
+	return;
+}
+
+void validate() {
+	int ok = 1, i = 0, j = 3;
+	
+	if ( password[0] == -1 ) return;
+	
+	if ( currentIndex == 0 ) {
+		LCD(2);
+		return;
+	}
+	
+	for (i = 0, j = 3; i < 4; i++, j--) {
+		if ( password[j] != input[i] ) {
+			ok = 0;
+			break;
+		}
+	}
+	
+	if ( ok ) {
+		LCD(0);
+		showLED = 1;
+	} else {
+		Buzz();
+		LCD(1);
+	}
+	
+	return;
+}
+
+void Init_GPIO() {
+    GPIO_SetMode(PC, BIT12, GPIO_MODE_OUTPUT);
+    GPIO_SetMode(PC, BIT13, GPIO_MODE_OUTPUT);
+    GPIO_SetMode(PC, BIT14, GPIO_MODE_OUTPUT);
+    GPIO_SetMode(PC, BIT15, GPIO_MODE_OUTPUT);
+    PC12 = PC13 = PC14 = PC15 = 1;
+    return;
+}
+
+int main(void)
+{
+	int i = 0, keyPressed = 0;
+	SYS_Init();
+	OpenKeyPad();
+	GPIO_SetMode(PB, BIT11, GPIO_MODE_OUTPUT);
+	Init_GPIO();
+	
+	init_LCD();
+	clearPassword();
+	
+	
+	while(1) {
+		i=ScanKey();
+		Display_7seg();
+		if ( showLED ) BinLED();
+		seed++;
+		seed %= INF;
+		srand(seed);
+
+		if( i == 0 ) {
+			keyPressed = 0;
+			continue;
+		}
+		
+		if(keyPressed) {
+			continue;
+		}
+		
+		keyPressed = 1;	
+		
+		if ( i == 7 ) {
+			generatePassword();
+		} else if ( i == 8 ) {
+			clearPassword();
+		} else if ( i == 9 ) {
+			validate();
+			currentIndex = 0;
+		} else {
+			userInput(i);
+		}
+	}
+	
+	return 0;
+}

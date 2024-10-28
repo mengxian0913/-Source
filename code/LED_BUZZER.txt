@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "NUC100Series.h"
+#include "MCU_init.h"
+#include "SYS_init.h"
+#include "Scankey.h"
+
+#define Do 956 // half freq of Do
+#define Si 506 // half freq of Si
+
+void Buzz(int number)
+{
+  int i;
+  for (i=0; i<number; i++) {
+    PB11=0; // PB11 = 0 to turn on Buzzer
+    CLK_SysTickDelay(100000);     // Delay 
+    PB11=1; // PB11 = 1 to turn off Buzzer    
+    CLK_SysTickDelay(100000);     // Delay 
+  }
+}
+
+void Init_GPIO() {
+  GPIO_SetMode(PC, BIT12, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT13, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT14, GPIO_MODE_OUTPUT);
+  GPIO_SetMode(PC, BIT15, GPIO_MODE_OUTPUT);
+  PC12 = PC13 = PC14 = PC15 = 1;
+  return;
+}
+
+void solve(int n) {
+  PC12 = ~((n >> 3) & 1);
+  PC13 = ~((n >> 2) & 1);
+  PC14 = ~((n >> 1) & 1);
+  PC15 = ~((n >> 0) & 1);
+  Buzz(n);
+  return;
+}
+
+
+int32_t main (void)
+{
+  int i = 0, keyPressed = 0;
+  SYS_Init();
+  OpenKeyPad();    
+  GPIO_SetMode(PB, BIT11, GPIO_MODE_OUTPUT);
+  Init_GPIO();
+
+  while(1) {
+    i=ScanKey();
+
+    if( i == 0 ) {
+      keyPressed = 0;
+      continue;
+    }
+
+    if(keyPressed) {
+      continue;
+    }
+
+    keyPressed = 1;
+
+    solve(i);
+  }
+}
