@@ -1,10 +1,10 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2023.9.25)  22 NOV 2024 01:54
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2023.9.25)  22 NOV 2024 01:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/vincent/Documents/逢甲大學/微處理機實習/結報/Lab7/a
-(/Users/vincent/Documents/逢甲大學/微處理機實習/結報/Lab7/a.tex
+**/Users/vincent/Documents/逢甲大學/微處理機實習/結報/Lab8/a
+(/Users/vincent/Documents/逢甲大學/微處理機實習/結報/Lab8/a.tex
 LaTeX2e <2022-11-01> patch level 1
 L3 programming layer <2023-02-22> (/usr/local/texlive/2022/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
@@ -331,7 +331,7 @@ Package xeCJK Warning: Undefined CJK default family `\CJKrmdefault' has been
 (xeCJK)                Try to use `\setCJKmainfont[<...>]{<...>}' to define
 (xeCJK)                it.
 
-(./a.aux)
+No file a.aux.
 \openout1 = `a.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 37.
@@ -344,7 +344,7 @@ LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 37.
 LaTeX Font Info:    ... okay on input line 37.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 37.
 LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 37.
- (/usr/local/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
+(/usr/local/texlive/2022/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2022/07/10 v2.5l Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 37.
@@ -449,24 +449,34 @@ Package xeCJK Warning: Unknown CJK family `\CJKttdefault' is being ignored.
 (xeCJK)                Try to use `\setCJKmonofont[<...>]{<...>}' to define
 (xeCJK)                it.
 
-(./sourceCode/p1.c [2] [3] [4]) [5]
+(./sourceCode/p1.c [2] [3] [4] [5] [6] [7] [8] [9] [10])
+/Users/vincent/Documents/逢甲大學/微處理機實習/結報/Lab8/a.tex:70: Undefined control sequence.
+l.70         \item [$\bullet$]實驗二\hpace
+                                       {5pt} 數字會跑步 \\
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 70--71
 
  []
 
-(./sourceCode/p2.c [6] [7] [8] [9] [10]) [11] (./a.aux)
+(./sourceCode/p2.c [11] [12] [13] [14] [15] [16] [17] [18]) [19] (./a.aux)
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.28pt have occurred.
 
  ) 
 Here is how much of TeX's memory you used:
- 9836 strings out of 476684
- 239831 string characters out of 5804055
- 2001018 words of memory out of 5000000
- 29960 multiletter control sequences out of 15000+600000
+ 9997 strings out of 476684
+ 241714 string characters out of 5804055
+ 2154018 words of memory out of 5000000
+ 30123 multiletter control sequences out of 15000+600000
  515883 words of font info for 80 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 70i,6n,81p,418b,1823s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 70i,6n,81p,785b,1819s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on a.pdf (11 pages).
+Output written on a.pdf (19 pages).
